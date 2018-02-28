@@ -1,0 +1,67 @@
+Yocto layer for LITMUS-RT system
+=============================================
+
+This layer allows building LITMUS-RT system using Yocto.
+
+
+Dependencies
+============
+
+This layer depends on:
+
+  URI: git://git.yoctoproject.org/poky
+  branch: pyro
+
+
+Minimal LITMUS-RT image
+=======================
+
+The meta-litmusrt provides minimal LITMUS-RT image:
+	* litmusrt-image-minimal
+
+This is the minimal initramfs image together with LITMUS-RT specific kernel
+together with functional liblitmus and feather-trace-tools.
+This image was intentinally created to provide synthetic RT load for virtualized
+environment (XEN) and measure its reliability, so has correspondent specifics.
+E.g. FeatherTrace functionality required Python is not available on the system 
+itself, but you can grab collected data to the host using ssh for extended
+post-processing.
+Currently tested for aarch64 only.
+
+Patches
+=======
+Please submit any patches against the meta-litmusrt layer as PR to:
+	https://github.com/xen-troops/meta-litmusrt
+
+Maintainer: Andrii Anisov <andrii_anisov@epam.com>
+
+
+Adding the litmusrt layer to your build
+=================================================
+
+In order to use this layer, you need to make the build system aware of
+it.
+
+Assuming the litmusrt layer exists at the top-level of your
+yocto build tree, you can add it to the build system by adding the
+location of the litmusrt layer to bblayers.conf, along with any
+other layers needed. e.g.:
+
+  BBLAYERS ?= " \
+    /path/to/yocto/meta \
+    /path/to/yocto/meta-poky \
+    /path/to/yocto/meta-yocto-bsp \
+    /path/to/yocto/meta-litmusrt \
+    "
+
+Build a minimal LITMUS-RT system for ARMv8
+==========================================
+
+    git clone git://git.yoctoproject.org/poky -b pyro
+    git clone https://github.com/xen-troops/meta-litmusrt
+    . poky/oe-init-build-env
+    bitbake-layers add-layer ../meta-litmusrt
+    MACHINE=genericarmv8 bitbake litmusrt-image-minimal
+
+Wait a bit.
+Enjoy of images found in tmp/deploy/images/genericarmv8/ .

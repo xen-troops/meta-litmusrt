@@ -1,0 +1,65 @@
+From bb181f220db3291f13be210a88b672aae3ecbcb7 Mon Sep 17 00:00:00 2001
+From: Andrii Anisov <andrii_anisov@epam.com>
+Date: Mon, 14 Aug 2017 13:02:21 +0300
+Subject: [PATCH] Resolve explicit dependencies on liblitmus path
+
+In order to get this stuff able to be built within yocto, resolve
+explicit dependencies on liblitmus path.
+
+Signed-off-by: Andrii Anisov <andrii_anisov@epam.com>
+---
+ Makefile            |  4 ++--
+ inc/depend.makefile | 22 ++++++++++++++++++++++
+ 2 files changed, 24 insertions(+), 2 deletions(-)
+ create mode 100644 inc/depend.makefile
+
+diff --git a/Makefile b/Makefile
+index 3fcfc38..aaf7fb1 100644
+--- a/Makefile
++++ b/Makefile
+@@ -9,7 +9,7 @@ LIBLITMUS ?= ../liblitmus
+ 
+ # Include default configuration from liblitmus
+ # Liblitmus must have been built before ft_tools can be built.
+-include ${LIBLITMUS}/inc/config.makefile
++# include ${LIBLITMUS}/inc/config.makefile
+ 
+ # all sources
+ vpath %.c src/
+@@ -48,4 +48,4 @@ st-job-stats: ${obj-st-job-stats}
+ 	$(CC) $(LDFLAGS) -o $@ ${obj-st-job-stats} #  $(LOADLIBES) $(LDLIBS)
+ 
+ # dependency discovery
+-include ${LIBLITMUS}/inc/depend.makefile
++include inc/depend.makefile
+diff --git a/inc/depend.makefile b/inc/depend.makefile
+new file mode 100644
+index 0000000..4d10534
+--- /dev/null
++++ b/inc/depend.makefile
+@@ -0,0 +1,22 @@
++# Generic dependency resolution. Part of liblitmus so that we don't have to
++#  carry it around in every project using liblitmus.
++
++obj-all = ${sort ${foreach target,${all},${obj-${target}}}}
++
++# rule to generate dependency files
++%.d: %.c
++	@set -e; rm -f $@; \
++		$(CC) -MM $(CPPFLAGS) $< > $@.$$$$; \
++		sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
++		rm -f $@.$$$$
++
++ifeq ($(MAKECMDGOALS),)
++MAKECMDGOALS += all
++endif
++
++ifneq ($(filter-out clean,$(MAKECMDGOALS)),)
++
++# Pull in dependencies.
++-include ${obj-all:.o=.d}
++
++endif
+-- 
+2.7.4
+
