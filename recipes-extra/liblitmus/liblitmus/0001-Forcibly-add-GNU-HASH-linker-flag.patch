@@ -1,0 +1,30 @@
+From 043bcfbd313b7d05b6404247472f168e9fc0fc52 Mon Sep 17 00:00:00 2001
+From: Andrii Anisov <andrii_anisov@epam.com>
+Date: Mon, 7 Aug 2017 20:03:12 +0300
+Subject: [PATCH] Forcibly add GNU HASH linker flag
+
+In order to avoid "No GNU_HASH in the elf binary" Yocto QA error,
+due to the fact that LDFLAGS are overrided by this make system,
+it is introduces required flag forcibly as well.
+
+Signed-off-by: Andrii Anisov <andrii_anisov@epam.com>
+---
+ Makefile | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Makefile b/Makefile
+index 2b615b5..dc91264 100644
+--- a/Makefile
++++ b/Makefile
+@@ -48,6 +48,8 @@ CPPFLAGS = ${flags-api} ${flags-${ARCH}} -DARCH=${ARCH} ${headers}
+ CFLAGS   = ${flags-debug}
+ LDFLAGS  = ${flags-${ARCH}}
+ 
++LDFLAGS += -Wl,--hash-style=gnu
++
+ # how to link against liblitmus
+ liblitmus-flags = -L${LIBLITMUS} -llitmus
+ 
+-- 
+2.7.4
+
